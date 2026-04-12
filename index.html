@@ -27,7 +27,21 @@ th{font-family:'Bangers',cursive;letter-spacing:1px;font-size:1.1rem;background:
 tr:hover td{background:#fff8d8}
 .medal{font-size:1.3rem}.pts{font-family:'Special Elite',monospace;font-weight:bold;text-align:right}
 .runner-list{display:flex;flex-direction:column;gap:8px}
-.runner-row{display:flex;align-items:center;gap:10px;background:var(--paper-dark);border:2px solid var(--ink);padding:8px 10px;border-radius:4px}
+.runner-row{display:flex;align-items:center;gap:10px;background:var(--paper-dark);border:2px solid var(--ink);padding:8px 10px;border-radius:4px;cursor:pointer;transition:transform .1s}
+.runner-row:hover{transform:translate(-1px,-1px);box-shadow:3px 3px 0 var(--ink)}
+.runner-modal{background:#fffdf5;border:4px solid var(--ink);box-shadow:8px 8px 0 var(--ink);max-width:520px;width:100%;max-height:80vh;display:flex;flex-direction:column;padding:24px;position:relative}
+.runner-modal::before{content:"";position:absolute;inset:6px;border:1px dashed var(--ink);pointer-events:none}
+.runner-modal-head{display:flex;align-items:center;gap:14px;margin-bottom:14px;border-bottom:3px solid var(--ink);padding-bottom:12px;flex-shrink:0}
+.runner-modal-head .avatar{width:60px;height:60px;font-size:1.4rem}
+.runner-modal-head h3{font-family:'Bangers',cursive;font-size:2rem;letter-spacing:1px}
+.runner-modal-head .stats{font-family:'Special Elite',monospace;font-size:.85rem;color:#555}
+.runner-modal-events{font-size:.95rem;overflow-y:auto;flex:1;min-height:0;padding-right:8px}
+.runner-modal-events .event-line{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px dashed #bbb;gap:8px}
+.runner-modal-events .event-line:last-child{border-bottom:none}
+.runner-modal-events .event-line .nm{flex:1}
+.runner-modal-events .event-line .pl{font-family:'Special Elite',monospace;color:#666;font-size:.8rem}
+.runner-modal-events .event-line .pt{font-family:'Special Elite',monospace;font-weight:bold}
+.runner-modal .close-btn{position:absolute;top:8px;right:12px;background:none;border:none;font-family:'Bangers',cursive;font-size:1.6rem;cursor:pointer;color:var(--ink);z-index:2}
 .avatar{width:42px;height:42px;border-radius:50%;border:2px solid var(--ink);background:var(--yellow);display:flex;align-items:center;justify-content:center;font-family:'Bangers',cursive;font-size:1rem;flex-shrink:0}
 .runner-row .name{font-family:'Bangers',cursive;font-size:1.2rem;letter-spacing:1px;flex:1}
 .runner-row .total{font-family:'Special Elite',monospace;font-weight:bold}
@@ -136,6 +150,20 @@ footer{text-align:center;margin-top:24px;padding:14px;border-top:3px double var(
   </div>
 
   <div class="unbound-banner">★ A PRESENTATION OF <span><em>UNBOUND</em></span> ★ THE OFFICIAL COMIC STRIP OF iNKWiTs ★</div>
+
+  <div class="modal-bg" id="runnerModal">
+    <div class="runner-modal">
+      <button class="close-btn" id="runnerClose">✕</button>
+      <div class="runner-modal-head">
+        <div class="avatar" id="rmAvatar"></div>
+        <div>
+          <h3 id="rmName"></h3>
+          <div class="stats" id="rmStats"></div>
+        </div>
+      </div>
+      <div class="runner-modal-events" id="rmEvents"></div>
+    </div>
+  </div>
 
   <div class="modal-bg" id="modal">
     <div class="modal">
@@ -368,8 +396,13 @@ function render(filteredEvents){
   ).join('');
 
   document.getElementById('roster').innerHTML = runners.map(r=>
-    `<div class="runner-row"><div class="avatar">${r.initials}</div><div class="name">${r.name}</div><div class="total">${totals[r.name].pts} pts</div></div>`
+    `<div class="runner-row" data-name="${r.name}"><div class="avatar">${r.initials}</div><div class="name">${r.name}</div><div class="total">${totals[r.name].pts} pts</div></div>`
   ).join('');
+
+  // Wire up roster click handlers
+  document.querySelectorAll('.runner-row').forEach(row=>{
+    row.addEventListener('click',()=>openRunnerModal(row.dataset.name));
+  });
 
   document.getElementById('events').innerHTML = filteredEvents.length
     ? filteredEvents.map(e=>{
@@ -392,6 +425,43 @@ function applyFilter(){
   const list = unboundHidden ? events.filter(e=>e.game!=='Unbound') : events;
   render(list);
 }
+
+function openRunnerModal(name){
+  const runner = runners.find(r=>r.name===name);
+  if(!runner) return;
+  // Find all events this runner participated in
+  const participated = events.map(e=>{
+    const idx = e.results.indexOf(name);
+    if(idx === -1) return null;
+    const dnf = (e.dnf||[]).includes(name);
+    const base = POINTS[idx]||0;
+    const net = base - (dnf?2:0);
+    return {event:e, place:idx+1, net, dnf};
+  }).filter(Boolean);
+
+  const totalPts = participated.reduce((s,p)=>s+p.net,0);
+  document.getElementById('rmAvatar').textContent = runner.initials;
+  document.getElementById('rmName').textContent = runner.name;
+  document.getElementById('rmStats').textContent = `${participated.length} events • ${totalPts} pts`;
+  const ord = ['1st','2nd','3rd','4th','5th'];
+  document.getElementById('rmEvents').innerHTML = participated.length
+    ? participated.map(p=>`
+        <div class="event-line">
+          <span class="nm">${p.event.name}${p.dnf?' <span class="dnf" title="DNF Penalty: -2 points">DNF</span>':''}</span>
+          <span class="pl">${ord[p.place-1]||p.place} • ${p.event.date}</span>
+          <span class="pt">${p.net>=0?'+':''}${p.net}</span>
+        </div>`).join('')
+    : '<p style="text-align:center;font-family:Patrick Hand,cursive;color:#888">No events yet.</p>';
+  document.getElementById('runnerModal').classList.add('show');
+}
+
+document.getElementById('runnerClose').addEventListener('click',()=>{
+  document.getElementById('runnerModal').classList.remove('show');
+});
+document.getElementById('runnerModal').addEventListener('click',e=>{
+  if(e.target.id==='runnerModal') document.getElementById('runnerModal').classList.remove('show');
+});
+
 applyFilter();
 
 const checkbox = document.getElementById('filterUnbound');
