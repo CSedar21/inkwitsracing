@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>iNKWiTs Speedrunning Association</title>
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Patrick+Hand&family=Special+Elite&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/bsky-embed/dist/bsky-embed.es.js" async type="module"></script>
+<style>
+:root{--paper:#f4ecd8;--paper-dark:#e8dcb8;--ink:#1a1a1a;--red:#d6324c;--yellow:#f7c948}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Patrick Hand',cursive;background:var(--paper);background-image:radial-gradient(circle at 1px 1px,rgba(0,0,0,.08) 1px,transparent 0);background-size:4px 4px;color:var(--ink);padding:20px;min-height:100vh}
+.gazette{max-width:1100px;margin:0 auto}
+.masthead{border-top:6px double var(--ink);border-bottom:6px double var(--ink);text-align:center;padding:18px 10px 10px;margin-bottom:20px}
+.masthead h1{font-family:'Bangers',cursive;font-size:clamp(2.4rem,7vw,5rem);letter-spacing:2px;line-height:1;text-shadow:3px 3px 0 var(--yellow)}
+.masthead .sub{display:flex;justify-content:space-between;align-items:center;font-family:'Special Elite',monospace;font-size:.85rem;margin-top:10px;border-top:1px solid var(--ink);padding-top:6px;flex-wrap:wrap;gap:8px}
+.panels{display:grid;grid-template-columns:repeat(12,1fr);gap:18px}
+.panel{background:#fffdf5;border:3px solid var(--ink);border-radius:4px;padding:18px;box-shadow:6px 6px 0 var(--ink);position:relative}
+.panel h2{font-family:'Bangers',cursive;font-size:1.8rem;letter-spacing:1px;border-bottom:3px solid var(--ink);margin-bottom:12px;padding-bottom:4px;display:inline-block}
+.leaderboard{grid-column:span 7}.runners-panel{grid-column:span 12}.events{grid-column:span 12}.quill{grid-column:span 5}
+@media(max-width:800px){.leaderboard,.runners-panel,.events,.quill{grid-column:span 12}}
+.bsky-feed{background:var(--paper);border:2px dashed #999;padding:12px;max-height:320px;overflow-y:auto}
+.bsky-feed bsky-embed{display:block;margin-bottom:10px}
+table{width:100%;border-collapse:collapse;font-size:1.1rem}
+th,td{text-align:left;padding:8px 6px;border-bottom:2px dashed #999}
+th{font-family:'Bangers',cursive;letter-spacing:1px;font-size:1.1rem;background:var(--yellow)}
+tr:hover td{background:#fff8d8}
+.medal{font-size:1.3rem}.pts{font-family:'Special Elite',monospace;font-weight:bold;text-align:right}
+.runner-list{display:flex;flex-direction:column;gap:8px}
+.runner-row{display:flex;align-items:center;gap:10px;background:var(--paper-dark);border:2px solid var(--ink);padding:8px 10px;border-radius:4px}
+.avatar{width:42px;height:42px;border-radius:50%;border:2px solid var(--ink);background:var(--yellow);display:flex;align-items:center;justify-content:center;font-family:'Bangers',cursive;font-size:1rem;flex-shrink:0}
+.runner-row .name{font-family:'Bangers',cursive;font-size:1.2rem;letter-spacing:1px;flex:1}
+.runner-row .total{font-family:'Special Elite',monospace;font-weight:bold}
+.event-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;max-height:720px;overflow-y:auto;padding:6px;border:2px dashed #999;background:var(--paper)}
+.event{border:3px solid var(--ink);background:#fff;padding:12px;border-radius:4px;box-shadow:4px 4px 0 var(--ink)}
+.event h3{font-family:'Bangers',cursive;font-size:1.4rem;letter-spacing:1px}
+.event .date{font-family:'Special Elite',monospace;font-size:.8rem;color:#666;margin-bottom:8px}
+.event ol{list-style:none;counter-reset:place}
+.event ol li{counter-increment:place;display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px dashed #bbb}
+.event ol li::before{content:counter(place)".";font-family:'Bangers',cursive;margin-right:8px;color:var(--red)}
+.event ol li .p{font-family:'Special Elite',monospace}
+.dnf{display:inline-block;background:var(--red);color:#fff;font-family:'Bangers',cursive;font-size:.7rem;letter-spacing:1px;padding:1px 6px;border:2px solid var(--ink);margin-left:6px;transform:rotate(-3deg);vertical-align:middle;cursor:help}
+.bubble{position:absolute;top:-18px;right:-10px;background:#fff;border:3px solid var(--ink);padding:4px 10px;border-radius:20px;font-family:'Bangers',cursive;font-size:.9rem;transform:rotate(4deg);box-shadow:3px 3px 0 var(--ink)}
+.proclamation{background:#fffdf5;border:3px solid var(--ink);box-shadow:6px 6px 0 var(--ink);padding:18px 22px;margin-bottom:20px;display:flex;gap:18px;align-items:center;flex-wrap:wrap;position:relative}
+.proclamation::before{content:"";position:absolute;inset:6px;border:1px dashed var(--ink);pointer-events:none}
+.seal{width:90px;height:90px;border-radius:50%;border:4px double var(--ink);background:radial-gradient(circle,var(--yellow) 0%,#e8b820 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Bangers',cursive;line-height:1;text-align:center;flex-shrink:0;transform:rotate(-6deg);box-shadow:3px 3px 0 var(--ink)}
+.seal .big{font-size:1.15rem;color:var(--red);letter-spacing:.5px}
+.seal .small{font-size:.55rem;letter-spacing:1px;margin-top:2px;padding:0 4px}
+.proclamation .text{flex:1;min-width:240px}
+.proclamation h2{font-family:'Bangers',cursive;font-size:1.6rem;letter-spacing:1px;color:var(--red)}
+.proclamation p{font-size:1.05rem;margin-top:4px}
+.proclamation .signoff{font-family:'Special Elite',monospace;font-size:.8rem;margin-top:8px;border-top:1px dashed #999;padding-top:6px}
+.signoff-row{display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;margin-top:8px}
+.signoff-row .signoff{flex:1;min-width:200px;margin-top:0}
+.signoff-row .support-box{margin-top:0}
+.sponsor-stamp{display:inline-block;border:3px double var(--red);color:var(--red);font-family:'Bangers',cursive;letter-spacing:2px;padding:4px 10px;transform:rotate(-3deg);font-size:.95rem;margin-top:6px}
+.sponsor-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:6px}
+.support-label{font-family:'Bangers',cursive;letter-spacing:1.5px;font-size:.95rem;color:var(--ink);margin-left:auto}
+.support-box{margin-top:10px;border:2px dashed var(--ink);background:var(--paper-dark);padding:8px 12px;display:inline-block;max-width:100%}
+.support-box .label{font-family:'Bangers',cursive;letter-spacing:1.5px;font-size:.95rem;color:var(--ink);display:block;margin-bottom:6px}
+.support-box .links{display:flex;gap:8px;flex-wrap:wrap}
+.sponsor-link{display:inline-block;background:var(--ink);color:var(--paper);font-family:'Bangers',cursive;letter-spacing:1px;padding:5px 10px;border:2px solid var(--ink);text-decoration:none;font-size:.85rem;box-shadow:3px 3px 0 var(--red);transition:transform .1s}
+.sponsor-link:hover{transform:translate(-1px,-1px);box-shadow:4px 4px 0 var(--red)}
+.sponsor-link.alt{background:var(--yellow);color:var(--ink);box-shadow:3px 3px 0 var(--ink)}
+.sponsor-link.alt:hover{box-shadow:4px 4px 0 var(--ink)}
+.unbound-banner{background:var(--ink);color:var(--paper);padding:10px 14px;text-align:center;font-family:'Bangers',cursive;letter-spacing:3px;font-size:1.05rem;margin:20px 0;border:3px solid var(--ink);box-shadow:6px 6px 0 var(--red);transform:rotate(-.4deg)}
+.unbound-banner span{color:var(--yellow)}
+.filter-bar{display:flex;align-items:center;gap:10px;margin-bottom:12px;font-size:1rem}
+.filter-bar input{width:18px;height:18px;cursor:pointer;accent-color:var(--red)}
+.filter-bar label{cursor:pointer;font-family:'Special Elite',monospace}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:99;padding:20px}
+.modal-bg.show{display:flex}
+.modal{background:#fffdf5;border:4px solid var(--ink);box-shadow:8px 8px 0 var(--ink);max-width:460px;padding:24px;text-align:center;position:relative}
+.modal::before{content:"";position:absolute;inset:6px;border:1px dashed var(--ink);pointer-events:none}
+.modal h3{font-family:'Bangers',cursive;font-size:2rem;letter-spacing:1px;color:var(--red);margin-bottom:10px}
+.modal p{font-size:1.15rem;margin-bottom:18px}
+.modal-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.modal button{font-family:'Bangers',cursive;font-size:1.1rem;letter-spacing:1px;padding:8px 18px;border:3px solid var(--ink);cursor:pointer;box-shadow:3px 3px 0 var(--ink);transition:transform .1s}
+.modal button:hover{transform:translate(-1px,-1px);box-shadow:4px 4px 0 var(--ink)}
+.btn-cancel{background:var(--yellow);color:var(--ink)}
+.btn-confirm{background:var(--red);color:#fff}
+footer{text-align:center;margin-top:24px;padding:14px;border-top:3px double var(--ink);font-family:'Special Elite',monospace;font-size:.8rem}
+</style>
+</head>
+<body>
+<div class="gazette">
+  <header class="masthead">
+    <h1>iNKWiTs Speedrunning Association</h1>
+    <div class="sub"><span>KINGDOM OF DOUGLAS • COFFEE CONTINENT</span><span>★ SANCTIONED BY THE CHANCELLOR ★</span><span id="today"></span></div>
+  </header>
+
+  <section class="proclamation">
+    <div class="seal"><span class="big">iNKWiTs</span><span class="small">CHANCELLOR ✦ ARBITER</span></div>
+    <div class="text">
+      <h2>By Royal Proclamation</h2>
+      <p>Hear ye! All events herein are sanctioned by <strong>iNKWiTs</strong>, Chancellor of Competition and Arbiter of Integrity, in service to the Kingdom of Douglas. Let no split go unverified, no run unwitnessed.</p>
+      <div class="signoff">— iNKWiTs, Chancellor &amp; Arbiter • Sealed at the Court of Douglas</div>
+      <div class="sponsor-row">
+        <div class="sponsor-stamp">★ SPONSORED BY <em>UNBOUND</em> ★</div>
+        <span class="support-label">★ Support iNKWiTs ★</span>
+        <a class="sponsor-link" href="https://inkwits.bigcartel.com/" target="_blank" rel="noopener">SHOP MERCH</a>
+        <a class="sponsor-link alt" href="https://www.patreon.com/cw/iNKWiTs/home" target="_blank" rel="noopener">PATREON</a>
+        <a class="sponsor-link" href="https://bsky.app/profile/inkwits.com" target="_blank" rel="noopener">BLUESKY</a>
+      </div>
+    </div>
+  </section>
+
+  <div class="panels">
+    <section class="panel leaderboard">
+      <span class="bubble">STANDINGS!</span>
+      <h2>Hall of Champions</h2>
+      <table><thead><tr><th>#</th><th>Runner</th><th>Events</th><th class="pts">Points</th></tr></thead><tbody id="lb"></tbody></table>
+    </section>
+    <section class="panel quill">
+      <span class="bubble">DISPATCHES!</span>
+      <h2>From the Chancellor's Quill</h2>
+      <p style="font-family:'Special Elite',monospace;font-size:.85rem;margin-bottom:10px;color:#555">Latest dispatches from iNKWiTs on Bluesky</p>
+      <div class="bsky-feed">
+        <bsky-embed username="inkwits.com" mode="" limit="5"></bsky-embed>
+      </div>
+    </section>
+    <section class="panel runners-panel">
+      <h2>The Roster</h2>
+      <div class="runner-list" id="roster"></div>
+    </section>
+
+    <section class="panel events">
+      <span class="bubble">RESULTS!</span>
+      <h2>Sanctioned Events</h2>
+      <div class="filter-bar">
+        <input type="checkbox" id="filterUnbound" />
+        <label for="filterUnbound">Hide Unbound entries</label>
+      </div>
+      <div class="event-grid" id="events"></div>
+    </section>
+  </div>
+
+  <div class="unbound-banner">★ A PRESENTATION OF <span><em>UNBOUND</em></span> ★ THE OFFICIAL COMIC STRIP OF iNKWiTs ★</div>
+
+  <div class="modal-bg" id="modal">
+    <div class="modal">
+      <h3 id="modalTitle">Identity Check!</h3>
+      <p id="modalMsg">Name this Unbound character to prove you're worthy of hiding these incredible records.</p>
+      <img id="quizImg" src="" alt="Unbound character" style="max-width:160px;max-height:180px;border:3px solid var(--ink);background:#fff;padding:6px;margin-bottom:14px;box-shadow:4px 4px 0 var(--ink)" />
+      <div class="modal-btns" id="quizBtns"></div>
+    </div>
+  </div>
+
+  <footer>SEALED IN THE COURT OF DOUGLAS • COFFEE CONTINENT • EST. 2026 • "ALL THE NEWS THAT'S FRAME-PERFECT"</footer>
+</div>
+<script>
+// ====== EDIT YOUR DATA HERE ======
+const runners = [
+  {name:"iNKWiTs", initials:"iW"},
+  {name:"13Volt",  initials:"13"},
+  {name:"KOLegend",initials:"KO"},
+  {name:"Alex",   initials:"AX"},
+  {name:"Chris",  initials:"CH"},
+];
+// Points awarded by placement
+const POINTS = [10,7,5,3,1];
+const events = [
+  {name:"Champion's Road Gauntlet", date:"APR 11, 2026", game:"Super Mario 3D World",
+   results:["13Volt","KOLegend","Alex","Chris"], dnf:["Alex","Chris"]},
+  {name:"Unbound #178: OZ", date:"APR 10, 2026", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #177: How They Get You", date:"APR 08, 2026", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #176: The Real Secret", date:"APR 06, 2026", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #175: The Snow", date:"APR 03, 2026", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #174: Rudolph", date:"APR 01, 2026", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #173: Exaggeration", date:"MAR 30, 2026", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #172: Snow Maze", date:"MAR 27, 2026", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #171: Children's Card", date:"MAR 25, 2026", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #170: Devastation", date:"MAR 23, 2026", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #169: \"Thank you\"", date:"MAR 20, 2026", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #168: The News", date:"MAR 18, 2026", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #167: Leaf in the Fall", date:"MAR 16, 2026", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #166: The Spookiest Season", date:"MAR 13, 2026", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #165: Shelob", date:"MAR 11, 2026", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #164: Banned Book Week", date:"MAR 09, 2026", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #163: Little Free Library", date:"MAR 05, 2026", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #162: Loophole", date:"MAR 04, 2026", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #161: Nobody", date:"MAR 03, 2026", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #160: Just Like the Movie", date:"FEB 27, 2026", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #159: Feeding Time", date:"FEB 26, 2026", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #158: BEES", date:"FEB 25, 2026", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #157: Bird Joke", date:"FEB 20, 2026", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #156: Mad World", date:"FEB 18, 2026", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #155: Happy Place", date:"FEB 16, 2026", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #154: Bad Omen", date:"FEB 13, 2026", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #153: Playing Catch Up", date:"FEB 11, 2026", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #152: Parking Lot", date:"FEB 06, 2026", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #151: Curbside", date:"FEB 04, 2026", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #150: The Manager", date:"FEB 02, 2026", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #149: Smile", date:"JAN 30, 2026", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #148: Mad", date:"JAN 28, 2026", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #147: I Don't Need It", date:"JAN 26, 2026", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #146: Disaster", date:"JAN 20, 2026", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #145: Always Be Prepared", date:"JAN 19, 2026", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #144: Expensive Solutions", date:"JAN 16, 2026", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #143: The Future of Everything", date:"JAN 15, 2026", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #142: Pizza, Pizza", date:"JAN 02, 2026", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #141: A Little Dramatic", date:"JAN 01, 2026", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #140: Essential Work", date:"DEC 31, 2025", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #139: Germs", date:"DEC 30, 2025", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #138: The Library Is Closed Until Further Notice", date:"DEC 24, 2025", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #137: Anime", date:"DEC 23, 2025", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #136: Mother Goose Returns (Part 2)", date:"DEC 04, 2025", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #135: Mother Goose Returns (Part 1)", date:"DEC 03, 2025", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #134: Effect", date:"DEC 02, 2025", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #133: Elimination", date:"SEP 26, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #132: Library Sale (part 2)", date:"SEP 25, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #131: Library Sale (part 1)", date:"SEP 24, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #130: Serious Reading", date:"SEP 23, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #129: Pretension", date:"SEP 20, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #128: A Night At The Book Club", date:"SEP 19, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #127: New Year's Day 2020", date:"SEP 18, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #126: Brushing Up", date:"SEP 17, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #125: The Mountain (part 3)", date:"SEP 16, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #124: The Mountain (part 2)", date:"SEP 13, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #123: The Mountain (part 1)", date:"SEP 12, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #122: Good Taste", date:"SEP 11, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #121: The Joy of Art Class", date:"SEP 10, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #120: Coffee Bar", date:"SEP 09, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #119: Issues", date:"SEP 06, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #118: Horror Story", date:"SEP 05, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #117: A Clockwork Orange", date:"SEP 04, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #116: Stand Out", date:"SEP 03, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #115: The Revenge of the Beanbags", date:"AUG 30, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #114: The Return of the Beanbag", date:"AUG 29, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #113: The Three Little Pigs (part 3)", date:"AUG 28, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #112: The Three Little Pigs (part 2)", date:"AUG 27, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #111: The Three Little Pigs (part 1)", date:"AUG 26, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #110: Priorities", date:"AUG 25, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #109: Literary Archaeology (part 2)", date:"AUG 24, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #108: Literary Archaeology (part 1)", date:"AUG 23, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #107: Big Words", date:"AUG 22, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #106: They Ruined It", date:"AUG 21, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #105: Introducing Tab!", date:"AUG 20, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #104: Arts and Crafts", date:"AUG 19, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #103: Book Club", date:"AUG 18, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #102: Wonderful Life", date:"AUG 17, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #101: Plant Facts", date:"AUG 16, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #100: Youth Fiction", date:"AUG 15, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #99: Leaf Earns His CDL (Part 3)", date:"AUG 14, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #98: Leaf Earns His CDL (Part 2)", date:"AUG 13, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #97: Leaf Earns His CDL (Part 1)", date:"AUG 12, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #96: Too Little, Too Late", date:"AUG 11, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #95: April Showers Bring May Flowers", date:"AUG 10, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #94: Escapism", date:"AUG 09, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #93: Blog", date:"AUG 08, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #92: The Wonderful Sheriff of Oz", date:"AUG 07, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #91: Old Farmer's Almanac", date:"AUG 06, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #90: Temptation", date:"AUG 05, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #89: Borrow Everything", date:"AUG 04, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #88: PSA", date:"AUG 03, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #87: Extra Strength", date:"AUG 02, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #86: Real Mysteries", date:"AUG 01, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #85: Customer Service", date:"JUL 31, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #84: Never Meet Your Heroes (Part 2)", date:"JUL 24, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #83: Never Meet Your Heroes (Part 1)", date:"JUL 23, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #82: For Shame!", date:"JUL 22, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #81: Something Magical", date:"JUL 21, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #80: The Future! (Part 3)", date:"JUL 20, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #79: The Future! (Part 2)", date:"JUL 19, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #78: The Future! (Part 1)", date:"JUL 18, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #77: Travel", date:"JUL 17, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #76: Irreplaceable", date:"JUL 16, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #75: Winter Facts", date:"JUL 15, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #74: Merry Christmas & Happy Holidays!", date:"JUL 14, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #73: New Hire", date:"JUL 13, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #72: Now Hiring", date:"JUL 12, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #71: Random Facts", date:"JUL 11, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #70: The Restroom", date:"JUL 10, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #69: Why Go to the Library?", date:"JUL 09, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #68: Hanging Out", date:"JUL 08, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #67: Study Room", date:"JUL 07, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #66: Solitude", date:"JUL 06, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #65: The Mystery of Edwin Drood", date:"JUL 05, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #64: Keeping it Real", date:"JUL 04, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #63: Guilty as Charged", date:"JUL 03, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #62: Time for Work", date:"JUL 02, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #61: The Last Page", date:"JUL 01, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #60: A Long Journey", date:"JUN 30, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #59: Red Flags", date:"JUN 29, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #58: Sequels", date:"JUN 28, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #57: Missing Something", date:"JUN 27, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #56: Handle with Care", date:"JUN 26, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #55: Public Computer", date:"JUN 25, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #54: The Power of Thought", date:"JUN 24, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #53: Certain Doom", date:"JUN 23, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #52: Toxic Behavior", date:"JUN 22, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #51: Lost on Shelf (Part 3)", date:"JUN 21, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #50: Lost on Shelf (Part 2)", date:"JUN 20, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #49: Lost on Shelf (part 1)", date:"JUN 19, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #48: Truth", date:"JUN 18, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #47: Audiobooks", date:"JUN 17, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #46: Caffeine Buzz", date:"JUN 16, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #45: Antique Books", date:"JUN 15, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #44: A Fine Situation", date:"JUN 14, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #43: Manga", date:"JUN 13, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #42: Get Lost", date:"JUN 12, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #41: Pecs of Love", date:"JUN 11, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #40: Beware", date:"JUN 10, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #39: READ", date:"JUN 05, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #38: Rockets Away", date:"JUN 04, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #37: Self-Help Books", date:"JUN 03, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #36: Shelving Site (Part 2)", date:"JUN 02, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #35: Shelving Site (Part 1)", date:"JUN 01, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #34: Trying Something Fun", date:"MAY 31, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #33: Can You Reach That?", date:"MAY 30, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #32: Brace Yourself", date:"MAY 29, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #31: Inclement Weather", date:"MAY 24, 2024", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #30: Bookworms", date:"FEB 19, 2018", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #29: Get Fined!", date:"FEB 15, 2018", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #28: Sci-Fi Section Part 2", date:"FEB 07, 2018", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #27: Sci-Fi Section", date:"JAN 31, 2018", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #26: Light Reading", date:"JAN 22, 2018", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #25: Dangerous", date:"JAN 15, 2018", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #24: Book Lover Problems", date:"JAN 09, 2018", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #23: A Christmas Carol", date:"JAN 02, 2018", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #22: I'll Do It Myself", date:"DEC 23, 2017", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #21: What's Your Secret?", date:"DEC 18, 2017", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #20: Emotional Damage", date:"DEC 15, 2017", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #19: I Knew It", date:"DEC 05, 2017", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #18: Free", date:"NOV 28, 2017", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #17: Skeptical Porcupines", date:"NOV 21, 2017", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #16: Reading Tips", date:"NOV 14, 2017", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #15: I Seek Literature", date:"NOV 07, 2017", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #14: The Whale", date:"OCT 31, 2017", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #13: Preschool Reading List", date:"OCT 25, 2017", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #12: New Releases", date:"OCT 18, 2017", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #11: The Ultimate Power", date:"OCT 11, 2017", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #10: Sick and Tired", date:"OCT 02, 2017", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #9: Best Storytime Ever", date:"SEP 23, 2017", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #8: Welcome to Storytime", date:"SEP 16, 2017", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #7: The Children are Restless", date:"SEP 10, 2017", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #6: You Sure?", date:"SEP 03, 2017", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #5: Different Worlds", date:"AUG 26, 2017", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #4: Times change, but People Don't", date:"AUG 20, 2017", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #3: Before the Internet", date:"AUG 12, 2017", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #2: The Rare Book Room", date:"AUG 05, 2017", game:"Unbound", results:["iNKWiTs"]},
+  {name:"Unbound #1: Typical", date:"JUL 29, 2017", game:"Unbound", results:["iNKWiTs"]},
+];
+// =================================
+
+document.getElementById('today').textContent =
+  new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'}).toUpperCase();
+
+const medals=['🥇','🥈','🥉'];
+
+function render(filteredEvents){
+  // Totals always computed from the FULL events list — filter only affects display
+  const totals = Object.fromEntries(runners.map(r=>[r.name,{pts:0,events:0}]));
+  events.forEach(e=>{
+    const dnfSet = new Set(e.dnf||[]);
+    e.results.forEach((name,i)=>{
+      if(totals[name]){
+        totals[name].pts += (POINTS[i]||0) - (dnfSet.has(name)?2:0);
+        totals[name].events += 1;
+      }
+    });
+  });
+
+  const ranked = runners.map(r=>({...r,...totals[r.name]})).sort((a,b)=>b.pts-a.pts);
+
+  document.getElementById('lb').innerHTML = ranked.map((r,i)=>
+    `<tr><td class="medal">${medals[i]||(i+1)}</td><td>${r.name}</td><td>${r.events}</td><td class="pts">${r.pts}</td></tr>`
+  ).join('');
+
+  document.getElementById('roster').innerHTML = runners.map(r=>
+    `<div class="runner-row"><div class="avatar">${r.initials}</div><div class="name">${r.name}</div><div class="total">${totals[r.name].pts} pts</div></div>`
+  ).join('');
+
+  document.getElementById('events').innerHTML = filteredEvents.length
+    ? filteredEvents.map(e=>{
+        const dnfSet = new Set(e.dnf||[]);
+        return `<div class="event"><h3>${e.name}</h3><div class="date">${e.date} • ${e.game}</div><ol>${
+          e.results.map((n,i)=>{
+            const base = POINTS[i]||0;
+            const isDnf = dnfSet.has(n);
+            const net = base - (isDnf?2:0);
+            const tag = isDnf?'<span class="dnf" title="DNF Penalty: -2 points deducted from placement score">DNF</span>':'';
+            return `<li><span>${n}${tag}</span><span class="p">${net>=0?'+':''}${net} pts</span></li>`;
+          }).join('')
+        }</ol></div>`;
+      }).join('')
+    : '<div style="padding:30px;text-align:center;font-family:Bangers,cursive;font-size:1.4rem;color:#888;grid-column:1/-1">★ NO EVENTS TO DISPLAY ★<br><span style="font-family:Patrick Hand,cursive;font-size:1rem">(told you so)</span></div>';
+}
+
+let unboundHidden = false;
+function applyFilter(){
+  const list = unboundHidden ? events.filter(e=>e.game!=='Unbound') : events;
+  render(list);
+}
+applyFilter();
+
+const checkbox = document.getElementById('filterUnbound');
+const modal = document.getElementById('modal');
+const quizImg = document.getElementById('quizImg');
+const quizBtns = document.getElementById('quizBtns');
+const modalTitle = document.getElementById('modalTitle');
+const modalMsg = document.getElementById('modalMsg');
+
+const characters = [
+  {name:"Leaf",   img:"leaf.png"},
+  {name:"Galley", img:"galley.png"},
+];
+const distractors = ["Tab","Mouse","Bean","Porcupine","Beanbag","Goose"];
+
+function shuffle(a){ return a.map(v=>[Math.random(),v]).sort((x,y)=>x[0]-y[0]).map(p=>p[1]); }
+
+function startQuiz(){
+  modalTitle.textContent = "Identity Check!";
+  modalMsg.textContent = "Name this Unbound character to prove you're worthy of hiding these incredible records.";
+  const correct = characters[Math.floor(Math.random()*characters.length)];
+  quizImg.src = correct.img;
+  quizImg.style.display = 'block';
+  quizImg.style.margin = '0 auto 14px';
+  const wrong = shuffle(distractors).slice(0,3);
+  const opts = shuffle([correct.name, ...wrong]);
+  quizBtns.innerHTML = opts.map(o=>`<button class="btn-cancel quiz-opt" data-name="${o}">${o}</button>`).join('');
+  quizBtns.querySelectorAll('.quiz-opt').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      if(btn.dataset.name === correct.name){
+        modal.classList.remove('show');
+        checkbox.checked = true;
+        unboundHidden = true;
+        applyFilter();
+      } else {
+        modalTitle.textContent = "Access Denied!";
+        modalMsg.textContent = "You must read more Unbound before you are authorized to hide these incredible records.";
+        quizImg.style.display = 'none';
+        quizBtns.innerHTML = '<button class="btn-cancel" id="dismissBtn">Fine, I\'ll Go Read!</button>';
+        document.getElementById('dismissBtn').addEventListener('click',()=>modal.classList.remove('show'));
+      }
+    });
+  });
+  modal.classList.add('show');
+}
+
+checkbox.addEventListener('change', e=>{
+  if(checkbox.checked){
+    checkbox.checked = false;
+    startQuiz();
+  } else {
+    unboundHidden = false;
+    applyFilter();
+  }
+});
+modal.addEventListener('click',e=>{ if(e.target===modal) modal.classList.remove('show'); });
+</script>
+</body>
+</html>
