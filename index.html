@@ -42,7 +42,7 @@ tr:hover td{background:#fff8d8}
 .runner-modal-events .event-line .pl{font-family:'Special Elite',monospace;color:#666;font-size:.8rem}
 .runner-modal-events .event-line .pt{font-family:'Special Elite',monospace;font-weight:bold}
 .runner-modal .close-btn{position:absolute;top:8px;right:12px;background:none;border:none;font-family:'Bangers',cursive;font-size:1.6rem;cursor:pointer;color:var(--ink);z-index:2}
-.avatar{width:42px;height:42px;border-radius:50%;border:2px solid var(--ink);background:var(--yellow);display:flex;align-items:center;justify-content:center;font-family:'Bangers',cursive;font-size:1rem;flex-shrink:0}
+.avatar{width:42px;height:42px;border-radius:50%;border:2px solid var(--ink);background:var(--yellow);display:flex;align-items:center;justify-content:center;font-family:'Bangers',cursive;font-size:1rem;flex-shrink:0;background-size:cover;background-position:center;color:transparent;overflow:hidden}
 .runner-row .name{font-family:'Bangers',cursive;font-size:1.2rem;letter-spacing:1px;flex:1}
 .runner-row .total{font-family:'Special Elite',monospace;font-weight:bold}
 .event-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;max-height:720px;overflow-y:auto;padding:6px;border:2px dashed #999;background:var(--paper)}
@@ -179,11 +179,11 @@ footer{text-align:center;margin-top:24px;padding:14px;border-top:3px double var(
 <script>
 // ====== EDIT YOUR DATA HERE ======
 const runners = [
-  {name:"iNKWiTs", initials:"iW"},
-  {name:"13Volt",  initials:"13"},
-  {name:"KOLegend",initials:"KO"},
-  {name:"Alex",   initials:"AX"},
-  {name:"Chris",  initials:"CH"},
+  {name:"iNKWiTs", initials:"iW", img:"inkwits.png"},
+  {name:"13Volt",  initials:"13", img:"13volt.png"},
+  {name:"KOLegend",initials:"KO", img:"kolegend.png"},
+  {name:"Alex",   initials:"AX", img:"alex.png"},
+  {name:"Chris",  initials:"CH", img:"chris.png"},
 ];
 // Points awarded by placement
 const POINTS = [10,7,5,3,1];
@@ -396,7 +396,7 @@ function render(filteredEvents){
   ).join('');
 
   document.getElementById('roster').innerHTML = runners.map(r=>
-    `<div class="runner-row" data-name="${r.name}"><div class="avatar">${r.initials}</div><div class="name">${r.name}</div><div class="total">${totals[r.name].pts} pts</div></div>`
+    `<div class="runner-row" data-name="${r.name}"><div class="avatar" style="background-image:url('${r.img}')">${r.initials}</div><div class="name">${r.name}</div><div class="total">${totals[r.name].pts} pts</div></div>`
   ).join('');
 
   // Wire up roster click handlers
@@ -440,7 +440,9 @@ function openRunnerModal(name){
   }).filter(Boolean);
 
   const totalPts = participated.reduce((s,p)=>s+p.net,0);
-  document.getElementById('rmAvatar').textContent = runner.initials;
+  const rmAv = document.getElementById('rmAvatar');
+  rmAv.textContent = runner.initials;
+  rmAv.style.backgroundImage = `url('${runner.img}')`;
   document.getElementById('rmName').textContent = runner.name;
   document.getElementById('rmStats').textContent = `${participated.length} events • ${totalPts} pts`;
   const ord = ['1st','2nd','3rd','4th','5th'];
